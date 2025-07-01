@@ -1,0 +1,84 @@
+# # apiVersion: custompodautoscaler.com/v1
+# # kind: CustomPodAutoscaler
+# # metadata:
+# #   name: autoscaler
+# #   labels: # ✅ Add this section
+# #     name: autoscaler # 👈 REQUIRED for CPA operator to track pods
+# # spec:
+# #   scaleTargetRef:
+# #     apiVersion: apps/v1
+# #     kind: Deployment
+# #     name: hello-kubernetes
+# #   config:
+# #     - name: interval
+# #       value: "10000"
+# #     - name: minReplicas
+# #       value: "1"
+# #     - name: maxReplicas
+# #       value: "5"
+# #   template:
+# #     spec:
+# #       containers:
+# #         - name: metric
+# #           image: public.ecr.aws/h1k5r6g8/aliahmedkhan/generic_repo:custom_pod_autoscaler-v0.2
+# #           args: ["--mode=metric"]
+# #           imagePullPolicy: Always
+# #         - name: evaluate
+# #           image: public.ecr.aws/h1k5r6g8/aliahmedkhan/generic_repo:custom_pod_autoscaler-v0.2
+# #           args: ["--mode=evaluate"]
+# #           imagePullPolicy: Always
+
+# apiVersion: custompodautoscaler.com/v1
+# kind: CustomPodAutoscaler
+# metadata:
+#   name: autoscaler
+#   labels:
+#     name: autoscaler
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: hello-kubernetes
+#   config:
+#     - name: interval
+#       value: "10000"
+#     - name: minReplicas
+#       value: "1"
+#     - name: maxReplicas
+#       value: "5"
+#   plugin:
+#     metric:
+#       container:
+#         image: public.ecr.aws/h1k5r6g8/aliahmedkhan/generic_repo:custom_pod_autoscaler-v0.2
+#         imagePullPolicy: Always
+#         args: ["--mode=metric"]
+#     evaluate:
+#       container:
+#         image: public.ecr.aws/h1k5r6g8/aliahmedkhan/generic_repo:custom_pod_autoscaler-v0.2
+#         imagePullPolicy: Always
+#         args: ["--mode=evaluate"]
+
+apiVersion: custompodautoscaler.com/v1
+kind: CustomPodAutoscaler
+metadata:
+  name: python-custom-autoscaler
+spec:
+  template:
+    spec:
+      containers:
+      - name: python-custom-autoscaler
+        image: public.ecr.aws/h1k5r6g8/aliahmedkhan/generic_repo:custom_pod_autoscaler-v0.4
+        imagePullPolicy: Always
+        env:
+        - name: TARGET_LATENCY
+          value: "0.5"
+        - name: PROMETHEUS_URL
+          value: prometheus-server.prometheus.svc.cluster.local
+
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ml-workload
+  config:
+    - name: interval
+      value: "10000"

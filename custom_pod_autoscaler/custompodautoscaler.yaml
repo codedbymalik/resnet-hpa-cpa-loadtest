@@ -1,0 +1,18 @@
+apiVersion: custompodautoscaler.com/v1
+kind: CustomPodAutoscaler
+metadata:
+  name: python-custom-autoscaler
+spec:
+  template:
+    spec:
+      containers:
+      - name: python-custom-autoscaler
+        image: public.ecr.aws/h1k5r6g8/aliahmedkhan/generic_repo:custom_pod_autoscaler-v0.4   
+        imagePullPolicy: Always
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hello-kubernetes
+  config:
+    - name: interval
+      value: "10000"

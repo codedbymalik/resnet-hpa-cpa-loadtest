@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: load-tester-job
+  labels:
+    app: load-tester
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: load-tester
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: load-tester
+        image: public.ecr.aws/h1k5r6g8/aliahmedkhan/generic_repo:ml-workload-v0.4
+        command:
+        - sh
+        - -c
+        - |
+          pip install prometheus_client redis aiohttp \
+            && exec python load_tester.py "$@"
+        args:
+        - load-tester            # dummy $0 so your flags become $1…$n
+        - --endpoint
+        - http://ml-workload.default.svc.cluster.local:6000/predict
+        - --workload
+        - "5"
+        - "5"
+        - "5"
+        - "5"
+        - "5"
+        volumeMounts:
+        - name: vol
+          mountPath: /app/test_images
+          subPath: app/test_images-2/imagenet-sample-images
+        - name: vol
+          mountPath: /app/entrypoint
+          subPath: app/test_images-2/
+      volumes:
+      - name: vol
+        persistentVolumeClaim:
+          claimName: myclaim2
